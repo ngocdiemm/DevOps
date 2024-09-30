@@ -1,0 +1,39 @@
+import json
+import datetime
+
+def lambda_handler(event, context):
+    # TODO implement
+    # return {
+    #     'statusCode': 200,
+    #     'body': json.dumps('Hello from Lambda!')
+    # }
+    
+    # Extract event details from the input event
+    event_date_str = event.get('EventDate')
+    current_date = datetime.datetime.utcnow() + datetime.timedelta(hours=7)
+
+    # Parse the event date
+    try:
+        event_date = datetime.datetime.strptime(event_date_str, "%B %d, %Y")
+    except ValueError as e:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({
+                'message': 'Invalid date format. Expected format is %B %d, %Y.',
+                'error': str(e)
+            })
+        }
+
+    # Compare dates
+    if event_date <= current_date + datetime.timedelta(days=1):
+        status = "IfDue"
+    else:
+        status = "NotDue"
+
+    # Return the status
+    return {
+        'status': status,
+        'EventType': event.get('EventType', 'NotUrgent-Unimportant'),
+        'EventDate': event.get('EventDate', 'Unknow'),
+        'UserId': event.get('UserId', 'fd5d7576-956f-4210-aea8-5c3ea3baa44e')
+    }
